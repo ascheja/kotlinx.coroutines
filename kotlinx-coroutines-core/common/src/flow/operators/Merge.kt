@@ -151,8 +151,9 @@ private class ChannelFlowMerge<T>(
     // The actual merge implementation with concurrency limit
     private suspend fun mergeImpl(scope: CoroutineScope, collector: ConcurrentFlowCollector<T>) {
         val semaphore = Semaphore(concurrency)
-        @Suppress("UNCHECKED_CAST")
+        val job: Job? = coroutineContext[Job]
         flow.collect { inner ->
+            job?.ensureActive()
             semaphore.acquire() // Acquire concurrency permit
             scope.launch {
                 try {

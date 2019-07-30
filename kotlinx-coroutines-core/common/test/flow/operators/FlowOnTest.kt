@@ -261,6 +261,21 @@ class FlowOnTest : TestBase() {
         finish(3)
     }
 
+    @Test
+    fun testCancellation() = runTest {
+        val result = flow {
+            emit(1)
+            emit(2)
+            emit(3)
+            expectUnreached()
+            emit(4)
+        }.flowOn(wrapperDispatcher())
+            .buffer(0)
+            .take(2)
+            .toList()
+        assertEquals(listOf(1, 2), result)
+    }
+
     private inner class Source(private val value: Int) {
         public var contextName: String = "unknown"
 
